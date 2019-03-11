@@ -48,16 +48,21 @@ public class Drag : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                this.gameObject.transform.position = new Vector3(hit.point.x, this.transform.position.y, hit.point.z);
-                List<GameObject> triggers;
-                if (LogicCollisionManager.Instance.CollisionDetection(this.gameObject, out triggers))
+                if (hit.transform.name == "Quad")
                 {
-                    Debug.Log(this.gameObject.name + " detect collision true " + triggers.Count);
+                    this.gameObject.transform.position = LogicCollisionManager.Instance.GetSimulatePosititon(
+                   this.gameObject, new Vector3(hit.point.x, this.transform.position.y, hit.point.z));
+                    List<GameObject> triggers;
+                    if (LogicCollisionManager.Instance.CollisionDetection(this.gameObject))
+                    {
+                        Debug.Log(this.gameObject.name + " detect collision true ");
+                    }
+                    else
+                    {
+                        // Debug.Log(this.gameObject.name + " detect collision false ");
+                    }
                 }
-                else
-                {
-                    // Debug.Log(this.gameObject.name + " detect collision false ");
-                }
+               
             }
         }
 
@@ -96,11 +101,11 @@ public class Drag : MonoBehaviour
     void OnDrawGizmos()
     {
 
-        Gizmos.color = Color.cyan;
-        for (int i = 0; i < lines.GetLength(0); i++)
-        {
-            Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
-        }
+        //Gizmos.color = Color.cyan;
+        //for (int i = 0; i < lines.GetLength(0); i++)
+        //{
+        //    Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
+        //}
         Gizmos.color = Color.red;
         for (int i = 0; i < custom.Length; i++)
         {

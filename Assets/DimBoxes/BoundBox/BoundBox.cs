@@ -16,7 +16,7 @@ namespace DimBoxes
 
         public Color lineColor = new Color(0f, 1f, 0.4f, 0.74f);
 
-        private Bounds bound;
+        public Bounds bound;
         private Vector3 boundOffset;
         [HideInInspector]
         public Bounds colliderBound;
