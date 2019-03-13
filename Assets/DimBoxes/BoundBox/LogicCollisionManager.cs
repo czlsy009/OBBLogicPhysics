@@ -131,8 +131,6 @@ public class LogicCollisionManager : MonoBehaviour
                         else
                         {
                             break;
-                            break;
-                            break;
                         }
                     }
                 }
@@ -153,15 +151,13 @@ public class LogicCollisionManager : MonoBehaviour
                                 collisionParticipant.Key.transform.position,
                                 collisionParticipant.Key.transform.rotation,
                                 CollisionParticipants[kinematicParticipantObject].bound,
-                                kinematicParticipantObject.transform.position + new Vector3(0, expectOffset.y * simulateStep * i, 0),
+                                kinematicParticipantObject.transform.position + new Vector3(offsetX, expectOffset.y * simulateStep * i, 0),
                                 kinematicParticipantObject.transform.rotation))
                         {
                             offsetY = expectOffset.y * simulateStep * i;
                         }
                         else
                         {
-                            break;
-                            break;
                             break;
                         }
                     }
@@ -183,15 +179,13 @@ public class LogicCollisionManager : MonoBehaviour
                                 collisionParticipant.Key.transform.position,
                                 collisionParticipant.Key.transform.rotation,
                                 CollisionParticipants[kinematicParticipantObject].bound,
-                                kinematicParticipantObject.transform.position + new Vector3(0, 0, expectOffset.z * simulateStep * i),
+                                kinematicParticipantObject.transform.position + new Vector3(offsetX, offsetY, expectOffset.z * simulateStep * i),
                                 kinematicParticipantObject.transform.rotation))
                         {
                             offsetZ = expectOffset.z * simulateStep * i;
                         }
                         else
                         {
-                            break;
-                            break;
                             break;
                         }
                     }

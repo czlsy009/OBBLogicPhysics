@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -34,8 +35,9 @@ namespace DimBoxes
         private Vector3[,] lines;
 
         private Quaternion quat;
+        public float FixedLineWidth = 0.02f;
 
-
+        public float DefalutDistance = 1f;
         private DimBoxes.DrawLines cameralines;
 
         private MeshFilter[] meshes;
@@ -57,7 +59,7 @@ namespace DimBoxes
         private Quaternion previousRotation;
 
         public Vector3[] OBBCorners;
-
+        private List<LineRenderer> lineRenders;
         public void Reset()
         {
             meshes = GetComponentsInChildren<MeshFilter>();
@@ -90,6 +92,7 @@ namespace DimBoxes
             startingScale = transform.localScale;
             previousScale = startingScale;
             init();
+            lineRenders = this.GetComponentsInChildren<LineRenderer>().ToList();
         }
 
         public void init()
@@ -247,15 +250,53 @@ namespace DimBoxes
             Gizmos.color = lineColor;
             for (int i = 0; i < lines.GetLength(0); i++)
             {
-                Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
+                //Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
             }
 
             Gizmos.color = Color.red;
             for (int i = 0; i < OBBCorners.Length; i++)
             {
-                Gizmos.DrawSphere(OBBCorners[i], 0.1f);
+                // Gizmos.DrawSphere(OBBCorners[i], 0.1f);
+                Debug.Log(OBBCorners[i] + i.ToString());
+            }
+            //if (line != null)
+            //{
+            //    line.SetPosition(0, OBBCorners[5]);//前左下
+            //    line.SetPosition(1, OBBCorners[4]);//前右下
+            //    line.SetPosition(2, OBBCorners[7]);//后右下
+            //    line.SetPosition(3, OBBCorners[6]);//后左下
+            //    line.SetPosition(4, OBBCorners[5]);
+            //    line.SetPosition(5, OBBCorners[1]);//前左上
+            //    line.SetPosition(6, OBBCorners[0]);//前右上
+            //    line.SetPosition(7, OBBCorners[3]);//后右上
+            //    line.SetPosition(8, OBBCorners[2]);//后左上
+
+            //    line.SetPosition(9, OBBCorners[1]);
+            //    line.SetPosition(10, OBBCorners[2]);
+            //    line.SetPosition(11, OBBCorners[6]);
+            //    line.SetPosition(12, OBBCorners[7]);
+            //    line.SetPosition(13, OBBCorners[3]);
+            //    line.SetPosition(14, OBBCorners[0]);
+            //    line.SetPosition(15, OBBCorners[4]);
+            //}
+            if (lineRenders.Count > 0)
+            {
+                for (int i = 0; i < lineRenders.Count; i++)
+                {
+
+                    lineRenders[i].startWidth = FixedLineWidth * Vector3.Distance(Camera.main.transform.position, lines[i, 0]) / DefalutDistance;
+                    lineRenders[i].endWidth = FixedLineWidth * Vector3.Distance(Camera.main.transform.position, lines[i, 1]) / DefalutDistance;
+                    lineRenders[i].SetPosition(0, lines[i, 0]);
+                    lineRenders[i].SetPosition(1, lines[i, 1]);
+                }
             }
         }
 
+        public LineRenderer line;
+        void Update()
+        {
+
+
+        }
     }
 }
