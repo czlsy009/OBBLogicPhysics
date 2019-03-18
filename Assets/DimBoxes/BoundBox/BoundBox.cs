@@ -250,14 +250,14 @@ namespace DimBoxes
             Gizmos.color = lineColor;
             for (int i = 0; i < lines.GetLength(0); i++)
             {
-                //Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
+                Gizmos.DrawLine(lines[i, 0], lines[i, 1]);
             }
 
             Gizmos.color = Color.red;
             for (int i = 0; i < OBBCorners.Length; i++)
             {
-                // Gizmos.DrawSphere(OBBCorners[i], 0.1f);
-                Debug.Log(OBBCorners[i] + i.ToString());
+                 Gizmos.DrawSphere(OBBCorners[i], 0.1f);
+                //Debug.Log(OBBCorners[i] + i.ToString());
             }
             //if (line != null)
             //{

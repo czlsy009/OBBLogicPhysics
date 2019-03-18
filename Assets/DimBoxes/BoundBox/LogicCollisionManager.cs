@@ -16,14 +16,14 @@ public class LogicCollisionManager : MonoBehaviour
         set { _instance = value; }
     }
 
-    private Dictionary<GameObject, Vector3[]> CustomizeCollisionParticipants = null;
+	private Dictionary<GameObject, Bounds> CustomizeCollisionParticipants = null;
     private Dictionary<GameObject, BoundBox> CollisionParticipants = null;
     public static float simulateStep = 0.01f;
     void Awake()
     {
         _instance = this;
         CollisionParticipants = new Dictionary<GameObject, BoundBox>();
-        CustomizeCollisionParticipants = new Dictionary<GameObject, Vector3[]>();
+        CustomizeCollisionParticipants = new Dictionary<GameObject, Bounds>();
     }
 
     public void AddParticipant(GameObject participantObject)
@@ -40,17 +40,128 @@ public class LogicCollisionManager : MonoBehaviour
     }
     public void AddCustomizeParticipant(GameObject participantObject, Vector3[] customizeBoundCorners)
     {
-        if (!CustomizeCollisionParticipants.ContainsKey(participantObject))
-        {
-            CustomizeCollisionParticipants.Add(participantObject, customizeBoundCorners);
-        }
-        else
-        {
-            CustomizeCollisionParticipants[participantObject] = customizeBoundCorners;
-        }
+		Bounds customBounds = new Bounds(GetBoundsCenter(customizeBoundCorners), GetBoundsSize(customizeBoundCorners));
+		if (CustomizeCollisionParticipants.ContainsKey(participantObject))
+		{
+			CustomizeCollisionParticipants.Add(participantObject, customBounds);
+		}
+		else
+		{
+			CustomizeCollisionParticipants[participantObject] = customBounds;
+		}
+        //if (!CustomizeCollisionParticipants.ContainsKey(participantObject))
+        //{
+        //    CustomizeCollisionParticipants.Add(participantObject, customizeBoundCorners);
+        //}
+        //else
+        //{
+        //    CustomizeCollisionParticipants[participantObject] = customizeBoundCorners;
+        //}
         ResetAllBoundBoxes();
     }
+	Vector3 GetBoundsCenter(Vector3[] corners)
+	{
+int cornersCount = corners.Length;
+float xCenter = 0f;
+float yCenter = 0f;
+float zCenter = 0f;
+float xMin = corners[0].x;
+float xMax = corners[0].x;
+float yMin = corners[0].y;
+float yMax = corners[0].y;
+float zMin = corners[0].z;
+float zMax = corners[0].z;
+		for (int i = 0; i<cornersCount; i++)
+		{
+			if (corners[i].x<xMin)
+			{
+				xMin = corners[i].x;
+			}
+			if (corners[i].x > xMax)
+			{
+				xMax = corners[i].x;
+			}
+		}
+		for (int i = 0; i<cornersCount; i++)
+		{
+			if (corners[i].y<yMin)
+			{
+				yMin = corners[i].y;
+			}
+			    if (corners[i].y > yMax)
+			{
+				yMax = corners[i].y;
+			}
+		}
+		for (int i = 0; i<cornersCount; i++)
+		{
+			if (corners[i].z<zMin)
+			{
+				zMin = corners[i].z;
+			}
+			if (corners[i].z > zMax)
+			{
+				zMax = corners[i].z;
+			}
+		}
+		xCenter = (xMax + xMin) / 2f;
+		yCenter = (yMax + yMin) / 2f;
+		zCenter = (zMax + zMin) / 2f;
 
+		return new Vector3(xCenter,yCenter,zCenter);
+	}
+
+	Vector3 GetBoundsSize(Vector3[] corners)
+	{
+		int cornersCount = corners.Length;
+		float xSize = 0f;
+		float ySize = 0f;
+		float zSize = 0f;
+		float xMin = corners[0].x;
+		float xMax = corners[0].x;
+float yMin = corners[0].y;
+float yMax = corners[0].y;
+float zMin = corners[0].z;
+float zMax = corners[0].z;
+		for (int i = 0; i < cornersCount; i++)
+		{
+			if (corners[i].x < xMin)
+			{
+				xMin = corners[i].x;
+			}
+			if (corners[i].x > xMax)
+			{
+				xMax = corners[i].x;
+			}
+		}
+		for (int i = 0; i<cornersCount; i++)
+		{
+			if (corners[i].y<yMin)
+			{
+				yMin = corners[i].y;
+			}
+			    if (corners[i].y > yMax)
+			{
+				yMax = corners[i].y;
+			}
+		}
+		for (int i = 0; i<cornersCount; i++)
+		{
+			if (corners[i].z<zMin)
+			{
+				zMin = corners[i].z;
+			}
+			if (corners[i].z > zMax)
+			{
+				zMax = corners[i].z;
+			}
+		}
+		xSize = xMax - xMin;
+		ySize = yMax - yMin;
+		zSize = zMax - zMin;
+
+		return new Vector3(xSize,ySize,zSize);
+	}
     void RecalculateOBBCorners()
     {
         for (int i = 0; i < CollisionParticipants.Values.Count; i++)
@@ -70,20 +181,31 @@ public class LogicCollisionManager : MonoBehaviour
     public bool CollisionDetection(GameObject kinematicParticipantObject)
     {
         ResetAllBoundBoxes();
+		bool interects = false;
         if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
         {
             foreach (KeyValuePair<GameObject, BoundBox> collisionParticipant in CollisionParticipants)
             {
                 if (collisionParticipant.Key != kinematicParticipantObject)
                 {
-                    return IntersectBoxBox(collisionParticipant.Value.bound, collisionParticipant.Key.transform.position,
+					interects= IntersectBoxBox(collisionParticipant.Value.bound, collisionParticipant.Key.transform.position,
                         collisionParticipant.Key.transform.rotation,
                         CollisionParticipants[kinematicParticipantObject].bound,
                         kinematicParticipantObject.transform.position, kinematicParticipantObject.transform.rotation);
                 }
             }
         }
-        return false;
+		if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
+		{
+			foreach (KeyValuePair<GameObject, Bounds> customizeParticipant in CustomizeCollisionParticipants)
+			{
+				interects = IntersectBoxBox(customizeParticipant.Value, customizeParticipant.Value.center,
+											customizeParticipant.Key.transform.rotation, CollisionParticipants[kinematicParticipantObject].bound,
+											kinematicParticipantObject.transform.position, kinematicParticipantObject.transform.rotation);
+			}
+		}
+		Debug.Log(interects);
+        return interects;
     }
 
     public Vector3 GetSimulatePosititon(GameObject kinematicParticipantObject, Vector3 tarPos)
@@ -108,7 +230,7 @@ public class LogicCollisionManager : MonoBehaviour
         float offsetX = 0f;
         float offsetY = 0f;
         float offsetZ = 0f;
-        Debug.Log(expectOffset);
+        //Debug.Log(expectOffset);
         for (int i = 0; i < Mathf.Abs(expectOffset.x / simulateStep); i++)
         {
             //ResetAllBoundBoxes();
@@ -193,141 +315,141 @@ public class LogicCollisionManager : MonoBehaviour
             }
 
         }
-        Debug.Log("offset : " + new Vector3(offsetX, offsetY, offsetZ));
+//        Debug.Log("offset : " + new Vector3(offsetX, offsetY, offsetZ));
         return kinematicParticipantObject.transform.position + new Vector3(offsetX, offsetY, offsetZ);
     }
-    public bool CollisionDetection(GameObject kinematicParticipantObject, bool detectHeight = true)
-    {
-        ResetAllBoundBoxes();
-        bool collisionTrigger = false;
-        if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
-        {
-            //Debug.Log(SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
-            //    SATAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners));
-            List<GameObject> collisionObjects = SingleAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners).Intersect(SingleAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
+    //public bool CollisionDetection(GameObject kinematicParticipantObject, bool detectHeight = true)
+    //{
+    //    ResetAllBoundBoxes();
+    //    bool collisionTrigger = false;
+    //    if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
+    //    {
+    //        //Debug.Log(SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
+    //        //    SATAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners));
+    //        List<GameObject> collisionObjects = SingleAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners).Intersect(SingleAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
 
-            if (detectHeight)
-            {
-                collisionObjects = collisionObjects.Intersect(SingleAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
-            }
+    //        if (detectHeight)
+    //        {
+    //            collisionObjects = collisionObjects.Intersect(SingleAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
+    //        }
 
-            collisionTrigger = collisionObjects.Count > 0;
-            //collisionTrigger = detectHeight && collisionTrigger &&
-            //    SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
-            //    SATAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners);
-            return collisionTrigger;
-        }
-        else
-        {
-            Debug.LogError("The Kinematic Participant Object is not contained in the collision system.");
-            return false;
-        }
-    }
-    public bool CollisionDetection(GameObject kinematicParticipantObject, out List<GameObject> triggerObjects, bool detectHeight = true)
-    {
-        ResetAllBoundBoxes();
-        bool collisionTrigger = false;
-        if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
-        {
-            //Debug.Log(SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
-            //    SATAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners));
-            List<GameObject> collisionObjects = SingleAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners).Intersect(SingleAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
+    //        collisionTrigger = collisionObjects.Count > 0;
+    //        //collisionTrigger = detectHeight && collisionTrigger &&
+    //        //    SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
+    //        //    SATAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners);
+    //        return collisionTrigger;
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("The Kinematic Participant Object is not contained in the collision system.");
+    //        return false;
+    //    }
+    //}
+    //public bool CollisionDetection(GameObject kinematicParticipantObject, out List<GameObject> triggerObjects, bool detectHeight = true)
+    //{
+    //    ResetAllBoundBoxes();
+    //    bool collisionTrigger = false;
+    //    if (CollisionParticipants.ContainsKey(kinematicParticipantObject))
+    //    {
+    //        //Debug.Log(SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
+    //        //    SATAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners));
+    //        List<GameObject> collisionObjects = SingleAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners).Intersect(SingleAxisDetection(SatAxis.Z, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
 
-            if (detectHeight)
-            {
-                collisionObjects = collisionObjects.Intersect(SingleAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
-            }
+    //        if (detectHeight)
+    //        {
+    //            collisionObjects = collisionObjects.Intersect(SingleAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners)).ToList();
+    //        }
 
-            collisionTrigger = collisionObjects.Count > 0;
-            //collisionTrigger = detectHeight && collisionTrigger &&
-            //    SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
-            //    SATAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners);
-            triggerObjects = collisionObjects;
-            return collisionTrigger;
-        }
-        else
-        {
-            Debug.LogError("The Kinematic Participant Object is not contained in the collision system.");
-            triggerObjects = null;
-            return false;
-        }
-    }
+    //        collisionTrigger = collisionObjects.Count > 0;
+    //        //collisionTrigger = detectHeight && collisionTrigger &&
+    //        //    SATAxisDetection(SatAxis.X, CollisionParticipants[kinematicParticipantObject].OBBCorners) &&
+    //        //    SATAxisDetection(SatAxis.Y, CollisionParticipants[kinematicParticipantObject].OBBCorners);
+    //        triggerObjects = collisionObjects;
+    //        return collisionTrigger;
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("The Kinematic Participant Object is not contained in the collision system.");
+    //        triggerObjects = null;
+    //        return false;
+    //    }
+    //}
 
-    List<GameObject> SingleAxisDetection(SatAxis satAxis, Vector3[] kpOBBCorners)
-    {
-        List<GameObject> singleAxisCollisionObjects = new List<GameObject>();
-        for (int i = 0; i < CollisionParticipants.Count; i++)
-        {
-            Vector3[] envOBBCorners = CollisionParticipants.Values.ToArray()[i].OBBCorners;
-            if (!envOBBCorners.Equals(kpOBBCorners))
-            {
-                Vector2 envAxisRnage = OffsetAxis(satAxis, envOBBCorners);
-                Vector2 kpAxisRnage = OffsetAxis(satAxis, kpOBBCorners);
-                float envCenter = (envAxisRnage.x + envAxisRnage.y) / 2f;
-                float kpCenter = (kpAxisRnage.x + kpAxisRnage.y) / 2f;
-                float range = (Mathf.Abs(envAxisRnage.y - envAxisRnage.x) + Mathf.Abs(kpAxisRnage.y - kpAxisRnage.x)) / 2f;
-                float distance = Mathf.Abs(kpCenter - envCenter);
-                if (distance < range)
-                {
-                    singleAxisCollisionObjects.Add(CollisionParticipants.Keys.ToArray()[i]);
-                    //Debug.Log(CollisionParticipants.Keys.ToArray()[i].name);
-                }
-            }
-        }
-        for (int i = 0; i < CustomizeCollisionParticipants.Count; i++)
-        {
-            Vector3[] envOBBCorners = CustomizeCollisionParticipants.Values.ToArray()[i];
-            if (!envOBBCorners.Equals(kpOBBCorners))
-            {
-                Vector2 envAxisRnage = OffsetAxis(satAxis, envOBBCorners);
-                Vector2 kpAxisRnage = OffsetAxis(satAxis, kpOBBCorners);
-                float envCenter = (envAxisRnage.x + envAxisRnage.y) / 2f;
-                float kpCenter = (kpAxisRnage.x + kpAxisRnage.y) / 2f;
-                float range = (Mathf.Abs(envAxisRnage.y - envAxisRnage.x) + Mathf.Abs(kpAxisRnage.y - kpAxisRnage.x)) / 2f;
-                float distance = Mathf.Abs(kpCenter - envCenter);
-                if (distance < range)
-                {
-                    //Debug.Log(CustomizeCollisionParticipants.Keys.ToArray()[i].name);
-                    singleAxisCollisionObjects.Add(CollisionParticipants.Keys.ToArray()[i]);
-                }
-            }
-        }
-        return singleAxisCollisionObjects;
-    }
+    //List<GameObject> SingleAxisDetection(SatAxis satAxis, Vector3[] kpOBBCorners)
+    //{
+    //    List<GameObject> singleAxisCollisionObjects = new List<GameObject>();
+    //    for (int i = 0; i < CollisionParticipants.Count; i++)
+    //    {
+    //        Vector3[] envOBBCorners = CollisionParticipants.Values.ToArray()[i].OBBCorners;
+    //        if (!envOBBCorners.Equals(kpOBBCorners))
+    //        {
+    //            Vector2 envAxisRnage = OffsetAxis(satAxis, envOBBCorners);
+    //            Vector2 kpAxisRnage = OffsetAxis(satAxis, kpOBBCorners);
+    //            float envCenter = (envAxisRnage.x + envAxisRnage.y) / 2f;
+    //            float kpCenter = (kpAxisRnage.x + kpAxisRnage.y) / 2f;
+    //            float range = (Mathf.Abs(envAxisRnage.y - envAxisRnage.x) + Mathf.Abs(kpAxisRnage.y - kpAxisRnage.x)) / 2f;
+    //            float distance = Mathf.Abs(kpCenter - envCenter);
+    //            if (distance < range)
+    //            {
+    //                singleAxisCollisionObjects.Add(CollisionParticipants.Keys.ToArray()[i]);
+    //                //Debug.Log(CollisionParticipants.Keys.ToArray()[i].name);
+    //            }
+    //        }
+    //    }
+    //    for (int i = 0; i < CustomizeCollisionParticipants.Count; i++)
+    //    {
+    //        Vector3[] envOBBCorners = CustomizeCollisionParticipants.Values.ToArray()[i];
+    //        if (!envOBBCorners.Equals(kpOBBCorners))
+    //        {
+    //            Vector2 envAxisRnage = OffsetAxis(satAxis, envOBBCorners);
+    //            Vector2 kpAxisRnage = OffsetAxis(satAxis, kpOBBCorners);
+    //            float envCenter = (envAxisRnage.x + envAxisRnage.y) / 2f;
+    //            float kpCenter = (kpAxisRnage.x + kpAxisRnage.y) / 2f;
+    //            float range = (Mathf.Abs(envAxisRnage.y - envAxisRnage.x) + Mathf.Abs(kpAxisRnage.y - kpAxisRnage.x)) / 2f;
+    //            float distance = Mathf.Abs(kpCenter - envCenter);
+    //            if (distance < range)
+    //            {
+    //                //Debug.Log(CustomizeCollisionParticipants.Keys.ToArray()[i].name);
+    //                singleAxisCollisionObjects.Add(CollisionParticipants.Keys.ToArray()[i]);
+    //            }
+    //        }
+    //    }
+    //    return singleAxisCollisionObjects;
+    //}
 
-    Vector2 OffsetAxis(SatAxis satAxis, Vector3[] corners)
-    {
-        float min = 0f;
-        float max = 0f;
-        for (int i = 0; i < corners.Length; i++)
-        {
+    //Vector2 OffsetAxis(SatAxis satAxis, Vector3[] corners)
+    //{
+    //    float min = 0f;
+    //    float max = 0f;
+    //    for (int i = 0; i < corners.Length; i++)
+    //    {
 
-            float axisValue;
-            switch (satAxis)
-            {
-                case SatAxis.X:
-                    axisValue = corners[i].x;
-                    break;
-                case SatAxis.Y:
-                    axisValue = corners[i].y;
-                    break;
-                case SatAxis.Z:
-                    axisValue = corners[i].z;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("satAxis", satAxis, null);
-            }
-            if (i == 0)
-            {
-                min = axisValue;
-                max = axisValue;
-            }
+    //        float axisValue;
+    //        switch (satAxis)
+    //        {
+    //            case SatAxis.X:
+    //                axisValue = corners[i].x;
+    //                break;
+    //            case SatAxis.Y:
+    //                axisValue = corners[i].y;
+    //                break;
+    //            case SatAxis.Z:
+    //                axisValue = corners[i].z;
+    //                break;
+    //            default:
+    //                throw new ArgumentOutOfRangeException("satAxis", satAxis, null);
+    //        }
+    //        if (i == 0)
+    //        {
+    //            min = axisValue;
+    //            max = axisValue;
+    //        }
 
-            min = axisValue < min ? axisValue : min;
-            max = axisValue > max ? axisValue : max;
-        }
-        return new Vector2(min, max);
-    }
+    //        min = axisValue < min ? axisValue : min;
+    //        max = axisValue > max ? axisValue : max;
+    //    }
+    //    return new Vector2(min, max);
+    //}
 
     public static bool IntersectBoxBox(Bounds box0, Vector3 pos0, Quaternion rot0, Bounds box1, Vector3 pos1, Quaternion rot1)
     {
@@ -462,4 +584,17 @@ public class LogicCollisionManager : MonoBehaviour
     {
         X, Y, Z
     }
+	void OnDrawGizmos()
+	{
+		if (CustomizeCollisionParticipants != null)
+		{
+			Gizmos.color = Color.blue;
+		for (int i = 0; i<CustomizeCollisionParticipants.Count; i++)
+		{
+			Gizmos.DrawWireSphere(CustomizeCollisionParticipants.Values.ToList()[i].center, 0.2f);
+				//Debug.Log(CustomizeCollisionParticipants.Values.ToList()[i].center+"  "+CustomizeCollisionParticipants.Values.ToList()[i].size);
+		}
+		}
+
+	}
 }

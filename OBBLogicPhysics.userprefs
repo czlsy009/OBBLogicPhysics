@@ -1,0 +1,30 @@
+﻿<Properties StartupConfiguration="{8106BA2E-CE6C-E39B-6859-68D4FC169E3A}|Unit Tests">
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Drag.cs">
+    <Files>
+      <File FileName="Assets/Src/DemoSrc/Test.cs" Line="35" Column="3" />
+      <File FileName="Assets/Src/Physics/VCollisionShape.cs" Line="171" Column="24" />
+      <File FileName="Assets/Src/Physics/VCollisionCylinderSector.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/VCollisionBox.cs" Line="28" Column="27" />
+      <File FileName="Assets/Src/Physics/SCollisionComponent.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/DictionaryView.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/CollisionShapeType.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/Pool/IObjPoolCtrl.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/Pool/IPooledMonoBehaviour.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/Pool/PooledClassObject.cs" Line="1" Column="1" />
+      <File FileName="Assets/Src/Physics/Pool/PoolObjHandle.cs" Line="1" Column="1" />
+      <File FileName="Assets/DimBoxes/BoundBox/LogicCollisionManager.cs" Line="81" Column="3" />
+      <File FileName="Assets/DimBoxes/BoundBox/BoundBox.cs" Line="259" Column="17" />
+      <File FileName="Assets/Drag.cs" Line="56" Column="46" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <RunToCursorBreakpoint file="/Users/DazzleEye/LSY/UnityProjects/GitHub/OBBLogicPhysics/Assets/Src/DemoSrc/Test.cs" relfile="Assets/Src/DemoSrc/Test.cs" line="31" column="34" />
+      <RunToCursorBreakpoint file="/Users/DazzleEye/LSY/UnityProjects/GitHub/OBBLogicPhysics/Assets/Src/DemoSrc/Test.cs" relfile="Assets/Src/DemoSrc/Test.cs" line="31" column="37" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
